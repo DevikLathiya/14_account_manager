@@ -1,10 +1,11 @@
+import 'package:account_manager/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'second_page.dart';
 
 class FirstPage extends StatefulWidget {
-  const FirstPage({Key? key}) : super(key: key);
+  const FirstPage({super.key});
 
   @override
   State<FirstPage> createState() => _FirstPageState();
@@ -49,20 +50,22 @@ class _FirstPageState extends State<FirstPage> {
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        color: Colors.black,
+        color: Colors.white,
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 50),
-              const CircleAvatar(radius: 40, backgroundColor: Colors.cyan, child: Icon(Icons.book, size: 50, color: Colors.white)),
+              SizedBox(height: MediaQuery.of(context).padding.top + 50),
+              ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset("assets/images/logo.png", height: 80)),
               const SizedBox(height: 10),
-              const Text("Account Manager", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text("Account Manager", style: Theme.of(context).poppinsBold.copyWith(fontSize: 24)),
               Card(
                 margin: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 elevation: 5,
                 child: Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 10),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -70,26 +73,31 @@ class _FirstPageState extends State<FirstPage> {
                         alignment: Alignment.center,
                         height: 50,
                         width: double.infinity,
-                        color: Colors.cyan,
-                        child: const Text("Settings", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                        decoration: BoxDecoration(color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10)),
+                        child: Text("Set Password", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: Colors.white)),
                       ),
                       Container(
                         height: 50,
-                        margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
+                        margin: const EdgeInsets.fromLTRB(5, 20, 5, 5),
                         child: TextField(
-                          inputFormatters: [LengthLimitingTextInputFormatter(4)],
+                          inputFormatters: [LengthLimitingTextInputFormatter(4), FilteringTextInputFormatter.digitsOnly],
                           controller: _pass,
+                          obscureText: true,
                           keyboardType: TextInputType.phone,
-                          decoration: const InputDecoration(labelText: "Set Password", border: OutlineInputBorder()),
+                          decoration: InputDecoration(
+                            labelText: "Set Password",
+                            labelStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text("Password must be 4 character long", style: TextStyle(fontSize: 15, color: Colors.grey.shade500)),
+                        child: Text("Password must be 4 character long", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
                       ),
                       Text(
                         "➽ Set Security question for retrieve your password when you forget",
-                        style: TextStyle(color: Colors.grey.shade400),
+                        style: Theme.of(context).poppinsRegular.copyWith(fontSize: 12, color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),
 
@@ -98,23 +106,32 @@ class _FirstPageState extends State<FirstPage> {
                         child: DropdownButton(
                           isExpanded: true,
                           underline: Container(),
-                          hint: const Text('Security Question 1'),
+                          hint: Text('Security Question 1', style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
                           value: _selected1,
                           onChanged: (newValue) {
                             setState(() {
                               _selected1 = newValue;
                             });
                           },
-                          items:
-                              Question1.map((location) {
-                                return DropdownMenuItem(value: location, child: Text(location, style: const TextStyle(fontSize: 14)));
-                              }).toList(),
+                          items: Question1.map((location) {
+                            return DropdownMenuItem(
+                              value: location,
+                              child: Text(location, style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
+                            );
+                          }).toList(),
                         ),
                       ),
                       Container(
                         margin: const EdgeInsets.all(5),
                         height: 50,
-                        child: TextField(controller: _que1, decoration: const InputDecoration(labelText: "Answer", border: OutlineInputBorder())),
+                        child: TextField(
+                          controller: _que1,
+                          decoration: InputDecoration(
+                            labelText: "Answer",
+                            labelStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                          ),
+                        ),
                       ),
 
                       Padding(
@@ -122,23 +139,32 @@ class _FirstPageState extends State<FirstPage> {
                         child: DropdownButton(
                           isExpanded: true,
                           underline: Container(),
-                          hint: const Text('Security Question 2'),
+                          hint: Text('Security Question 2', style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
                           value: _selected2,
                           onChanged: (newValue) {
                             setState(() {
                               _selected2 = newValue;
                             });
                           },
-                          items:
-                              Question2.map((location) {
-                                return DropdownMenuItem(value: location, child: Text(location, style: const TextStyle(fontSize: 14)));
-                              }).toList(),
+                          items: Question2.map((location) {
+                            return DropdownMenuItem(
+                              value: location,
+                              child: Text(location, style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
+                            );
+                          }).toList(),
                         ),
                       ),
                       Container(
                         height: 50,
                         margin: const EdgeInsets.all(5),
-                        child: TextField(controller: _que2, decoration: const InputDecoration(labelText: "Answer", border: OutlineInputBorder())),
+                        child: TextField(
+                          controller: _que2,
+                          decoration: InputDecoration(
+                            labelText: "Answer",
+                            labelStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -148,12 +174,7 @@ class _FirstPageState extends State<FirstPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(fixedSize: const Size(80, 30), backgroundColor: Colors.cyan),
-                    onPressed: () {},
-                    child: const Text("Exit"),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(fixedSize: const Size(80, 30), backgroundColor: Colors.cyan),
+                    style: ElevatedButton.styleFrom(fixedSize: const Size(200, 50), backgroundColor: MyColors.primaryColor),
                     onPressed: () {
                       if (_pass.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter Password")));
@@ -188,7 +209,7 @@ class _FirstPageState extends State<FirstPage> {
                         );
                       }
                     },
-                    child: Text("Set"),
+                    child: Text("Save", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: Colors.white)),
                   ),
                 ],
               ),

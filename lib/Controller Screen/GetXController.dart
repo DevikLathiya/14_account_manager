@@ -1,22 +1,21 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
 import '../second_page.dart';
 
-
-class MyController extends GetxController{
-  RxInt selectedindex = 0.obs;
+class MyController extends GetxController {
+  RxInt selectedIndex = 0.obs;
   RxInt index = 0.obs;
   RxInt digit = 0.obs;
   RxString code = ''.obs;
-  RxString password=''.obs;
-  Box box=Hive.box("Account");
-
+  RxString password = ''.obs;
+  Box box = Hive.box("Account");
 
   RxInt selectedRoomTypeIndex = (-1).obs;
   RxnString? roomTypeError = RxnString(null);
+
+  ScrollController scrollController = ScrollController();
 
   // ✅ Call this when submitting the form
   bool validateRoomTypeSelection() {
@@ -28,74 +27,62 @@ class MyController extends GetxController{
     return true;
   }
 
-  // Call this on tap to reset error
-  void onRoomTypeTap(int index) {
-    selectedRoomTypeIndex.value = index;
-    roomTypeError?.value = null;
-  }
-
-
   addDigit(int digit) {
     if (code.value.length > 3) {
       return;
     }
     code.value = code + digit.toString();
-    print('Code : ${code.value}');
-    selectedindex.value = code.value.length;
+    selectedIndex.value = code.value.length;
   }
 
   backspace() {
-    if (code.value.length == 0) {
+    if (code.value.isEmpty) {
       return;
     }
     code.value = code.value.substring(0, code.value.length - 1);
-    selectedindex.value = code.value.length;
+    selectedIndex.value = code.value.length;
   }
 
-  get_pass()
-  {
-    password.value=box.get("password");
+  getPassword() {
+    password.value = box.get("password");
     return password;
   }
 
-  RxString selected1=''.obs;
-  dropdown(value){
-    selected1.value=value;
-  }
+  RxString selected1 = ''.obs;
 
+  dropdown(value) {
+    selected1.value = value;
+  }
 
   //----------------Database----------------------
 
-  RxList<Map> getData=[{}].obs;
-  RxList<Map<String, dynamic>> trData = RxList<Map<String, dynamic>>([]);
+  RxList<Map> getData = [{}].obs;
 
-  insertData(String name) async{
-    String insert= "insert into Account values(null,'$name','0','0','0')";
-    await SecondPage.database!.rawInsert(insert).then((value) => (value) {
-      print("value $value");
-    });
+  Future<void> insertData(String name) async {
+    String insert = "insert into Account values(null,'$name','0','0','0')";
+    await SecondPage.database!
+        .rawInsert(insert)
+        .then(
+          (value) => (value) {
+            print("value $value");
+          },
+        );
     print("inserted");
   }
 
-  selectData() async {
+  Future<void> selectData() async {
     String select = "select * from Account";
     getData.value = await SecondPage.database!.rawQuery(select);
-    //totalstatement();
+    await totalStatement();
   }
 
-  updateData(String name,int id) async{
+  Future<void> updateData(String name, int id) async {
     String update = "update Account set name='$name' where id='$id'";
     await SecondPage.database!.rawUpdate(update);
-    selectData();
+    await selectData();
   }
-  // delateData(int id) async{
-  //   String delete = "DELETE FROM Account WHERE id=$id";
-  //   await SecondPage.database!.rawDelete(delete);
-  //   selectData();
-  //   totalstatement();
-  // }
 
-  delateData(int id) async {
+  Future<void> deleteData(int id) async {
     // Delete account
     String deleteAccount = "DELETE FROM Account WHERE id=$id";
     await SecondPage.database!.rawDelete(deleteAccount);
@@ -106,117 +93,106 @@ class MyController extends GetxController{
 
     // Refresh data
     await selectData();
-    await totalstatement();
+    // await totalStatement();
   }
-
 
   //------------------------balance Page---------------------
 
-  DateTime? pickDate,todayDate = DateTime.now();
-  RxString today=''.obs;
+  RxList<Map<String, dynamic>> mainTrans = RxList<Map<String, dynamic>>([]);
+  RxString mainBalance = ''.obs, cr = ''.obs, de = ''.obs;
 
-  mydate() {
-    today.value="${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
+  Future<void> totalStatement() async {
+    String main = "SELECT SUM(credit) as mainCredit , SUM(debit) as mainDebit FROM MyTransaction";
+    mainTrans.value = await SecondPage.database!.rawQuery(main);
+
+    cr.value = mainTrans[0]['mainCredit']?.toString() ?? "0";
+    de.value = mainTrans[0]['mainDebit']?.toString() ?? "0";
+
+
+    // ✅ safely parse as double
+    final crVal = double.tryParse(cr.value) ?? 0.0;
+    final deVal = double.tryParse(de.value) ?? 0.0;
+
+    mainBalance.value = (crVal - deVal).toStringAsFixed(2);
+    print("total : ${mainBalance.value}");
   }
+}
 
-  datepickerbox(BuildContext context) async {
-    today.value="${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
-    pickDate = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.utc(1980),
-        lastDate: DateTime.now(),
-        );
+class BalanceController extends GetxController {
+  RxString group = "".obs;
 
-    if(pickDate==null)
-      {
-        today.value="${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
-      }
-    else
-      {
-        today.value="${pickDate!.day}/${pickDate!.month}/${pickDate!.year}";
-      }
-    print(today);
-  }
+  DateTime? pickDate, todayDate = DateTime.now();
+  RxString today = ''.obs;
 
-  RxString group="".obs;
-  rediobtn(String value){
-    group.value = value;
-  }
+  RxList<Map<String, dynamic>> totalTrans = RxList<Map<String, dynamic>>([]);
+  RxString debits = ''.obs;
+  RxString credit = ''.obs;
+  RxString totalBalance = ''.obs;
 
-  balanceData(id, detail,credit,debit) async {
-    String insert = "insert into MyTransaction values(null,'${today.value}','$id','$detail',$credit,$debit)";
+  RxList<Map<String, dynamic>> trData = RxList<Map<String, dynamic>>([]);
+
+  myDate() => today.value = "${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
+
+  Future<void> insertBalanceData(id, String detail, String credit, String debit) async {
+    var newCredit = double.tryParse(credit) ?? 0.0;
+    var newDebit = double.tryParse(debit) ?? 0.0;
+    String insert = "insert into MyTransaction values(null,'${today.value}','$id','$detail',${newCredit.toString()},${newDebit.toString()})";
     await SecondPage.database!.rawInsert(insert);
-    trans_select(id);
+
+    getTransaction(id);
   }
 
-  trans_select(int id) async {
+  Future<void> getTransaction(int id) async {
     String select = "select * from MyTransaction where AcId='$id' order by id desc";
     trData.value = await SecondPage.database!.rawQuery(select);
 
-    if(trData.isNotEmpty){
-      total_rupe(id);
-    }
+    // if (trData.isNotEmpty) {
+    totalCreDeb(id);
+    // }
   }
 
-  trans_update(int tid,String date,name,credit,debit) async{
-    String dd=date;
-    if(today.value!="")
-    {
-      dd=today.value;
+  Future<void> transUpdate(int tid, String date, name, String credit, String debit) async {
+    String dd = date;
+    if (today.value != "") {
+      dd = today.value;
     }
-    String update = "update MyTransaction set date='$dd',detail='$name',credit='$credit',debit='$debit' where id='$tid'";
+    var newCredit = double.tryParse(credit) ?? 0.0;
+    var newDebit = double.tryParse(debit) ?? 0.0;
+    String update = "update MyTransaction set date='$dd',detail='$name',credit='$newCredit',debit='$newDebit' where id='$tid'";
     await SecondPage.database!.rawUpdate(update);
-    print(update);
   }
 
-  trans_delete(int id) async{
-    String delete = "delete from MyTransaction where id = '$id'";
+  Future<void> transDelete({required int orderId, required int acId}) async {
+    String delete = "delete from MyTransaction where id = '$orderId'";
     await SecondPage.database!.rawDelete(delete);
-    trans_select(id);
+    getTransaction(acId);
   }
 
-  RxList<Map<String, dynamic>> totalTrans = RxList<Map<String, dynamic>>([]);
-  RxString debits=''.obs;
-  RxString credit=''.obs;
-  RxString totalBalance=''.obs;
-
-  total_rupe(int id) async {
+  Future<void> totalCreDeb(int id) async {
     totalBalance.value = "";
-    String Credit = "SELECT SUM(credit) as sum_cre , SUM(debit) as sum_deb FROM MyTransaction where AcId =$id";
-    await SecondPage.database!.rawQuery(Credit).then((value) {
-      totalTrans.value = value;
-    });
-    credit.value = totalTrans[0]['sum_cre'].toString();
-    debits.value = totalTrans[0]['sum_deb'].toString();
-    totalBalance.value = (int.parse(credit.value) - int.parse(debits.value)).toString();
+    String creditQuery = "SELECT SUM(credit) as sum_cre , SUM(debit) as sum_deb FROM MyTransaction where AcId =$id";
+    totalTrans.value = await SecondPage.database!.rawQuery(creditQuery);
+
+    credit.value = totalTrans[0]['sum_cre']?.toString() ?? "0.0";
+    debits.value = totalTrans[0]['sum_deb']?.toString() ?? "0.0";
+
+    final crVal = double.tryParse(credit.value) ?? 0.0;
+    final deVal = double.tryParse(debits.value) ?? 0.0;
+
+    totalBalance.value = (crVal - deVal).toStringAsFixed(2);
 
     String update = "update Account set credit='${credit.value}',debit='${debits.value}', balance='${totalBalance.value}' where id=$id";
     await SecondPage.database!.rawUpdate(update);
-
-    selectData();
   }
 
-  RxList<Map<String, dynamic>> mainTrans = RxList<Map<String, dynamic>>([]);
-  RxString mainBalance=''.obs , cr =''.obs, de =''.obs;
-  RxInt a1 =0.obs;
-  RxInt a2 =0.obs;
+  Future<void> datePickerBox(BuildContext context) async {
+    today.value = "${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
+    pickDate = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.utc(1980), lastDate: DateTime.now());
 
-  totalstatement() async {
-    String main = "SELECT SUM(credit) as mainCredit , SUM(debit) as mainDebit  FROM MyTransaction";
-    mainTrans.value = await SecondPage.database!.rawQuery(main);
-
-      cr.value = mainTrans[0]['mainCredit'].toString();
-      de.value = mainTrans[0]['mainDebit'].toString();
-
-      if(cr.value=='null')
-        {
-          cr.value = '0';
-          de.value = '0';
-        }
-      mainBalance.value = (int.parse(cr.value) - int.parse(de.value)).toString();
-
-      print("ttotal : ${mainBalance.value}");
+    if (pickDate == null) {
+      today.value = "${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
+    } else {
+      today.value = "${pickDate!.day}/${pickDate!.month}/${pickDate!.year}";
+    }
   }
-
 }

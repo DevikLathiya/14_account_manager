@@ -23,7 +23,6 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    print(pass);
     return GetMaterialApp(
       title: 'Account Manager',
       home: (pass==null) ? FirstPage() : SecondPage() ,debugShowCheckedModeBanner: false,
