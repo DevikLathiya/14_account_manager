@@ -69,166 +69,95 @@ class _SecondPageState extends State<SecondPage> {
     return Scaffold(
       backgroundColor: MyColors.secondaryColor,
       resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  alignment: Alignment.center,
-                  child: ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset("assets/images/logo.png", height: 80)),
-                ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5.0),
-                  child: Text(
-                    "Account Manager",
-                    style: TextStyle(fontSize: 23, color: Colors.black.withBlue(100), fontWeight: FontWeight.w600),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [
+            MyColors.secondaryColor,
+            MyColors.primaryColor
+          ],
+          begin: AlignmentGeometry.topLeft,end: AlignmentGeometry.bottomRight
+          )
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    child: ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset("assets/images/logo.png", height: 80)),
                   ),
-                ),
-                InkWell(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Dialog(
-                          insetPadding: EdgeInsets.symmetric(horizontal: 30),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                height: 50,
-                                decoration: BoxDecoration(color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10)),
-                                alignment: Alignment.center,
-                                child: Text("Forgot Password?", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: Colors.white)),
-                              ),
-                              const SizedBox(height: 14),
-                              Text(
-                                "➽ Give following  Security questions answer for reset password.",
-                                style: Theme.of(context).poppinsRegular.copyWith(fontSize: 12, color: Colors.grey),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 10),
-                              Text("➽ ${box.get("Question1")}", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
-                              TextField(
-                                controller: _answer1,
-                                decoration: InputDecoration(
-                                  hintText: "Answer",
-                                  hintStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5.0),
+                    child: Text(
+                      "Account Manager",
+                      style: TextStyle(fontSize: 23, color: Colors.black.withBlue(100), fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            insetPadding: EdgeInsets.symmetric(horizontal: 30),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: 50,
+                                  decoration: BoxDecoration(color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10)),
+                                  alignment: Alignment.center,
+                                  child: Text("Forgot Password?", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: Colors.white)),
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text("➽ ${box.get("Question2")}", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
-                              TextField(
-                                controller: _answer2,
-                                decoration: InputDecoration(
-                                  hintText: "Answer",
-                                  hintStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                                const SizedBox(height: 14),
+                                Text(
+                                  "➽ Give following  Security questions answer for reset password.",
+                                  style: Theme.of(context).poppinsRegular.copyWith(fontSize: 12, color: Colors.grey),
+                                  textAlign: TextAlign.center,
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  GFButton(
-                                    onPressed: () {
-                                      Get.back();
-                                    },
-                                    text: "Cancel",
-                                    textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.primaryColor),
-                                    type: GFButtonType.outline,
-                                    shape: GFButtonShape.pills,
-                                    color: MyColors.primaryColor,
+                                const SizedBox(height: 10),
+                                Text("➽ ${box.get("Question1")}", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
+                                TextField(
+                                  controller: _answer1,
+                                  decoration: InputDecoration(
+                                    hintText: "Answer",
+                                    hintStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
                                   ),
-                                  GFButton(
-                                    onPressed: () {
-                                      if (_answer1.text.isEmpty || _answer2.text.isEmpty) {
-                                        Fluttertoast.showToast(
-                                          msg: "Enter Answer",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.SNACKBAR,
-                                          timeInSecForIosWeb: 1,
-                                          backgroundColor: MyColors.primaryColor,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0,
-                                        );
-                                      } else {
-                                        if (_answer1.text == box.get("answer1") && _answer2.text == box.get("answer2")) {
-                                          Get.back();
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Container(
-                                                  width: double.infinity,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10)),
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    "Set new Password",
-                                                    style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: Colors.white),
-                                                  ),
-                                                ),
-                                                content: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    TextField(
-                                                      inputFormatters: [LengthLimitingTextInputFormatter(4), FilteringTextInputFormatter.digitsOnly],
-                                                      controller: _newPass,
-                                                      keyboardType: TextInputType.phone,
-                                                      decoration: InputDecoration(
-                                                        hintText: "New Password",
-                                                        hintStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 20),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                      children: [
-                                                        GFButton(
-                                                          onPressed: () {
-                                                            Get.back();
-                                                          },
-                                                          text: "cancel",
-                                                          type: GFButtonType.outline,
-                                                          shape: GFButtonShape.pills,
-                                                          color: MyColors.primaryColor,
-                                                          textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.primaryColor),
-                                                        ),
-                                                        GFButton(
-                                                          onPressed: () {
-                                                            if (_newPass.text.isEmpty) {
-                                                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter Password")));
-                                                            } else if (_newPass.text.length <= 3) {
-                                                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter Valid Password")));
-                                                            } else {
-                                                              box.put('password', _newPass.text);
-                                                              ScaffoldMessenger.of(
-                                                                context,
-                                                              ).showSnackBar(const SnackBar(content: Text("Successfully Reset Password")));
-                                                              Get.back();
-                                                            }
-                                                          },
-                                                          text: "Set",
-                                                          textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.white),
-                                                          shape: GFButtonShape.pills,
-                                                          color: MyColors.primaryColor,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        } else {
+                                ),
+                                const SizedBox(height: 10),
+                                Text("➽ ${box.get("Question2")}", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14)),
+                                TextField(
+                                  controller: _answer2,
+                                  decoration: InputDecoration(
+                                    hintText: "Answer",
+                                    hintStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    GFButton(
+                                      onPressed: () {
+                                        Get.back();
+                                      },
+                                      text: "Cancel",
+                                      textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.primaryColor),
+                                      type: GFButtonType.outline,
+                                      shape: GFButtonShape.pills,
+                                      color: MyColors.primaryColor,
+                                    ),
+                                    GFButton(
+                                      onPressed: () {
+                                        if (_answer1.text.isEmpty || _answer2.text.isEmpty) {
                                           Fluttertoast.showToast(
-                                            msg: "Incorrect Answer",
+                                            msg: "Enter Answer",
                                             toastLength: Toast.LENGTH_SHORT,
                                             gravity: ToastGravity.SNACKBAR,
                                             timeInSecForIosWeb: 1,
@@ -236,51 +165,132 @@ class _SecondPageState extends State<SecondPage> {
                                             textColor: Colors.white,
                                             fontSize: 16.0,
                                           );
+                                        } else {
+                                          if (_answer1.text == box.get("answer1") && _answer2.text == box.get("answer2")) {
+                                            Get.back();
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  title: Container(
+                                                    width: double.infinity,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10)),
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      "Set new Password",
+                                                      style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: Colors.white),
+                                                    ),
+                                                  ),
+                                                  content: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      TextField(
+                                                        inputFormatters: [LengthLimitingTextInputFormatter(4), FilteringTextInputFormatter.digitsOnly],
+                                                        controller: _newPass,
+                                                        keyboardType: TextInputType.phone,
+                                                        decoration: InputDecoration(
+                                                          hintText: "New Password",
+                                                          hintStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.grey),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 20),
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                        children: [
+                                                          GFButton(
+                                                            onPressed: () {
+                                                              Get.back();
+                                                            },
+                                                            text: "cancel",
+                                                            type: GFButtonType.outline,
+                                                            shape: GFButtonShape.pills,
+                                                            color: MyColors.primaryColor,
+                                                            textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.primaryColor),
+                                                          ),
+                                                          GFButton(
+                                                            onPressed: () {
+                                                              if (_newPass.text.isEmpty) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter Password")));
+                                                              } else if (_newPass.text.length <= 3) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter Valid Password")));
+                                                              } else {
+                                                                box.put('password', _newPass.text);
+                                                                ScaffoldMessenger.of(
+                                                                  context,
+                                                                ).showSnackBar(const SnackBar(content: Text("Successfully Reset Password")));
+                                                                Get.back();
+                                                              }
+                                                            },
+                                                            text: "Set",
+                                                            textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.white),
+                                                            shape: GFButtonShape.pills,
+                                                            color: MyColors.primaryColor,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          } else {
+                                            Fluttertoast.showToast(
+                                              msg: "Incorrect Answer",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.SNACKBAR,
+                                              timeInSecForIosWeb: 1,
+                                              backgroundColor: MyColors.primaryColor,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0,
+                                            );
+                                          }
                                         }
-                                      }
-                                    },
-                                    text: "Verify",
-                                    textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.white),
-                                    shape: GFButtonShape.pills,
-                                    color: MyColors.primaryColor,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ).paddingAll(20),
-                        );
-                      },
-                    );
-                  },
-                  child: Text(
-                    "Forget Password",
-                    style: TextStyle(fontSize: 15, color: Colors.black.withBlue(40), fontWeight: FontWeight.w300),
+                                      },
+                                      text: "Verify",
+                                      textStyle: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: MyColors.white),
+                                      shape: GFButtonShape.pills,
+                                      color: MyColors.primaryColor,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ).paddingAll(20),
+                          );
+                        },
+                      );
+                    },
+                    child: Text(
+                      "Forget Password",
+                      style: TextStyle(fontSize: 15, color: Colors.black.withBlue(40), fontWeight: FontWeight.w300),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    DigitHolder(width: width, index: 0, selectedIndex: selectedindex, code: code),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      DigitHolder(width: width, index: 0, selectedIndex: selectedindex, code: code),
 
-                    DigitHolder(width: width, index: 1, selectedIndex: selectedindex, code: code),
+                      DigitHolder(width: width, index: 1, selectedIndex: selectedindex, code: code),
 
-                    DigitHolder(width: width, index: 2, selectedIndex: selectedindex, code: code),
+                      DigitHolder(width: width, index: 2, selectedIndex: selectedindex, code: code),
 
-                    DigitHolder(width: width, index: 3, selectedIndex: selectedindex, code: code),
-                  ],
-                ),
-              ],
+                      DigitHolder(width: width, index: 3, selectedIndex: selectedindex, code: code),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          Container(
-            alignment: Alignment.center,
-            margin: EdgeInsets.fromLTRB(10, 0, 10, MediaQuery.of(context).padding.bottom + (Platform.isIOS ? 0 : 10)),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
-            child: NumberPad(),
-          ),
-        ],
+            Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.fromLTRB(10, 0, 10, MediaQuery.of(context).padding.bottom + (Platform.isIOS ? 0 : 10)),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(30)),
+              child: NumberPad(),
+            ),
+          ],
+        ),
       ),
     );
   }

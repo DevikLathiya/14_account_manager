@@ -29,9 +29,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
       init: BalanceController(),
       initState: (state) => state.controller?.getTransaction(widget.person['id']),
       builder: (controller) {
-        print("totalTrans ${controller.totalTrans}");
-        print("widget ${widget.person}");
-        print("controller.totalTrans[0]['sum_cre'] ${controller.totalTrans[0]['sum_cre']}");
+        controller.credit.value;
         return Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
@@ -177,73 +175,83 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                             context: context,
                                             builder: (cont) {
                                               return AlertDialog(
-                                                title: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                title: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    GFButton(
-                                                      onPressed: () async {
-                                                        Get.back();
-                                                        if ((double.tryParse(item['credit'].toString()) ?? 0.0) > 0) {
-                                                          controller.group.value = "Credit";
-                                                          _amount.text = "${item['credit']}";
-                                                        } else {
-                                                          controller.group.value = "Debit";
-                                                          _amount.text = "${item['debit']}";
-                                                        }
-                                                        transactionDialog(
-                                                          item['id'],
-                                                          item['date'],
-                                                          item['detail'],
-                                                          item['credit'],
-                                                          item['debit'],
-                                                          controller,
-                                                          context,
-                                                        );
-                                                      },
-                                                      text: "Edit",
-                                                      textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
-                                                      type: GFButtonType.outline,
-                                                      shape: GFButtonShape.pills,
-                                                      color: MyColors.primaryColor,
-                                                    ),
-                                                    GFButton(
-                                                      onPressed: () {
-                                                        Get.back();
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (context) {
-                                                            return AlertDialog(
-                                                              title: Text("Are Want To Delete?", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18)),
-                                                              actions: [
-                                                                GFButton(
-                                                                  onPressed: () => Get.back(),
-                                                                  text: "cancel",
-                                                                  textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
-                                                                  type: GFButtonType.outline,
-                                                                  shape: GFButtonShape.pills,
-                                                                  color: MyColors.primaryColor,
-                                                                ),
-                                                                GFButton(
-                                                                  onPressed: () async {
-                                                                    temp = true;
-                                                                    await controller.transDelete(orderId: item['id'], acId: widget.person['id']);
-                                                                    Get.back();
-                                                                  },
-                                                                  text: "Delete",
-                                                                  textStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
-                                                                  shape: GFButtonShape.pills,
-                                                                  color: MyColors.primaryColor,
-                                                                ),
-                                                              ],
+                                                    Text("$amount", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: tColor)),
+                                                    Text("${item['detail']}", style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
+                                                    SizedBox(height: 16),
+
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                      children: [
+                                                        GFButton(
+                                                          onPressed: () async {
+                                                            Get.back();
+                                                            if ((double.tryParse(item['credit'].toString()) ?? 0.0) > 0) {
+                                                              controller.group.value = "Credit";
+                                                              _amount.text = "${item['credit']}";
+                                                            } else {
+                                                              controller.group.value = "Debit";
+                                                              _amount.text = "${item['debit']}";
+                                                            }
+                                                            transactionDialog(
+                                                              item['id'],
+                                                              item['date'],
+                                                              item['detail'],
+                                                              item['credit'],
+                                                              item['debit'],
+                                                              controller,
+                                                              context,
                                                             );
                                                           },
-                                                        );
-                                                      },
-                                                      text: "Delete",
-                                                      textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
-                                                      type: GFButtonType.outline,
-                                                      shape: GFButtonShape.pills,
-                                                      color: MyColors.primaryColor,
+                                                          text: "Edit",
+                                                          textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
+                                                          type: GFButtonType.outline,
+                                                          shape: GFButtonShape.pills,
+                                                          color: MyColors.primaryColor,
+                                                        ),
+                                                        GFButton(
+                                                          onPressed: () {
+                                                            Get.back();
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (context) {
+                                                                return AlertDialog(
+                                                                  title: Text("Are Want To Delete?", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18)),
+                                                                  actions: [
+                                                                    GFButton(
+                                                                      onPressed: () => Get.back(),
+                                                                      text: "cancel",
+                                                                      textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
+                                                                      type: GFButtonType.outline,
+                                                                      shape: GFButtonShape.pills,
+                                                                      color: MyColors.primaryColor,
+                                                                    ),
+                                                                    GFButton(
+                                                                      onPressed: () async {
+                                                                        temp = true;
+                                                                        await controller.transDelete(orderId: item['id'], acId: widget.person['id']);
+                                                                        Get.back();
+                                                                      },
+                                                                      text: "Delete",
+                                                                      textStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                                                                      shape: GFButtonShape.pills,
+                                                                      color: MyColors.primaryColor,
+                                                                    ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                          text: "Delete",
+                                                          textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
+                                                          type: GFButtonType.outline,
+                                                          shape: GFButtonShape.pills,
+                                                          color: MyColors.primaryColor,
+                                                        ),
+                                                      ],
                                                     ),
                                                   ],
                                                 ),
@@ -613,7 +621,8 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   GFButton(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 4),
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 8),
+                    size: 40,
                     onPressed: () {
                       controller.group.value = "";
                       _particular.clear();
@@ -621,14 +630,15 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                       controller.myDate();
                       Get.back();
                     },
-                    text: "cancel",
+                    text: "Cancel",
                     textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
                     type: GFButtonType.outline,
                     shape: GFButtonShape.pills,
                     color: MyColors.primaryColor,
                   ),
                   GFButton(
-                    padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 4),
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 20, vertical: 8),
+                    size: 40,
                     onPressed: () async {
                       temp = true;
                       String credit = "0", debit = "0", detail = _particular.text;

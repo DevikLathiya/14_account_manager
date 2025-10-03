@@ -39,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<String> question2 = [
     "What is the name of your favourite sports team?",
     "Who was your favourite singer or band?",
-    " What is your first job?",
+    "What is your first job?",
     "What was the first dish you learned to cook?",
     "What was the model of your first motorised vehicle?",
     "What was your childhood nickname?",
@@ -53,130 +53,133 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (controller) {
         controller.index.value;
         return Scaffold(
-          body: CustomScrollView(
-            controller: controller.scrollController,
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverPersistentHeader(floating: false, pinned: true, delegate: CustomSliverAppBarDelegate(expandedHeight: 250, controller: controller)),
-              SliverList(delegate: SliverChildListDelegate([SizedBox(height: 60), SizedBox()])),
+          body: RefreshIndicator(
+            onRefresh: () => controller.selectData(),
+            child: CustomScrollView(
+              controller: controller.scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverPersistentHeader(floating: false, pinned: true, delegate: CustomSliverAppBarDelegate(expandedHeight: 250, controller: controller)),
+                SliverList(delegate: SliverChildListDelegate([SizedBox(height: 60), SizedBox()])),
 
-              controller.getData.isEmpty
-                  ? SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.warning, color: Colors.red, size: 50),
-                            Text("No Data Found", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20)),
-                            SizedBox(height: 4),
-                            Text("Click On Add Button to add Account.", style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
-                          ],
+                controller.getData.isEmpty
+                    ? SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.warning, color: Colors.red, size: 50),
+                              Text("No Data Found", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20)),
+                              SizedBox(height: 4),
+                              Text("Click On Add Button to add Account.", style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                  : SliverList.separated(
-                      itemCount: controller.getData.length,
-                      separatorBuilder: (context, index) =>
-                          Divider(height: 1, color: Colors.grey.shade300, endIndent: 20, indent: 20).paddingSymmetric(vertical: 20),
-                      itemBuilder: (context, index) {
-                        return SizedBox(
-                          child: Slidable(
-                            key: ValueKey("player.id"),
-                            endActionPane: ActionPane(
-                              motion: ScrollMotion(),
-                              extentRatio: 0.35,
-                              children: [
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    accountDialog(controller.getData[index]['id'], controller.getData[index]['name'], controller);
-                                  },
-                                  icon: Icons.edit,
-                                  autoClose: true,
-                                  padding: EdgeInsets.zero,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                SizedBox(width: 10),
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: Text("Are Want To Delete?", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18)),
-                                          actions: [
-                                            GFButton(
-                                              onPressed: () {
-                                                Get.back();
-                                              },
-                                              text: "cancel",
-                                              textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
-                                              type: GFButtonType.outline,
-                                              shape: GFButtonShape.pills,
-                                              color: MyColors.primaryColor,
+                      )
+                    : SliverList.separated(
+                        itemCount: controller.getData.length,
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1, color: Colors.grey.shade300, endIndent: 20, indent: 20).paddingSymmetric(vertical: 20),
+                        itemBuilder: (context, index) {
+                          return SizedBox(
+                            child: Slidable(
+                              key: ValueKey("player.id"),
+                              endActionPane: ActionPane(
+                                motion: ScrollMotion(),
+                                extentRatio: 0.35,
+                                children: [
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      accountDialog(controller.getData[index]['id'], controller.getData[index]['name'], controller);
+                                    },
+                                    icon: Icons.edit,
+                                    autoClose: true,
+                                    padding: EdgeInsets.zero,
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  SizedBox(width: 10),
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Text("Are Want To Delete?", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18)),
+                                            actions: [
+                                              GFButton(
+                                                onPressed: () {
+                                                  Get.back();
+                                                },
+                                                text: "cancel",
+                                                textStyle: TextStyle(fontWeight: FontWeight.bold, color: MyColors.primaryColor, fontSize: 15),
+                                                type: GFButtonType.outline,
+                                                shape: GFButtonShape.pills,
+                                                color: MyColors.primaryColor,
+                                              ),
+                                              GFButton(
+                                                onPressed: () {
+                                                  controller.deleteData(controller.getData[index]['id']);
+                                                  controller.totalStatement();
+                                                  Get.back();
+                                                },
+                                                text: "Delete",
+                                                textStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                                                shape: GFButtonShape.pills,
+                                                color: MyColors.primaryColor,
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    backgroundColor: Colors.red.shade300,
+                                    icon: Icons.delete,
+                                    autoClose: true,
+                                    padding: EdgeInsets.zero,
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  SizedBox(width: 10),
+                                ],
+                              ),
+                              child: GestureDetector(
+                                onTap: () => Get.to(BalanceDetailScreen(controller.getData[index]))?.then((value) => controller.selectData()),
+                                child: Container(
+                                  color: Colors.transparent,
+                                  padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "${controller.getData[index]['name']}",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.fade,
+                                              style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18),
                                             ),
-                                            GFButton(
-                                              onPressed: () {
-                                                controller.deleteData(controller.getData[index]['id']);
-                                                controller.totalStatement();
-                                                Get.back();
-                                              },
-                                              text: "Delete",
-                                              textStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
-                                              shape: GFButtonShape.pills,
-                                              color: MyColors.primaryColor,
+                                            Text(
+                                              "Credit : ₹ ${controller.getData[index]['credit']} - Debit : ₹ ${controller.getData[index]['debit']}",
+                                              style: Theme.of(context).poppinsRegular.copyWith(fontSize: 12),
                                             ),
                                           ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                  backgroundColor: Colors.red.shade300,
-                                  icon: Icons.delete,
-                                  autoClose: true,
-                                  padding: EdgeInsets.zero,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                SizedBox(width: 10),
-                              ],
-                            ),
-                            child: GestureDetector(
-                              onTap: () => Get.to(BalanceDetailScreen(controller.getData[index]))?.then((value) => controller.selectData()),
-                              child: Container(
-                                color: Colors.transparent,
-                                padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${controller.getData[index]['name']}",
-                                            maxLines: 1,
-                                            overflow: TextOverflow.fade,
-                                            style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18),
-                                          ),
-                                          Text(
-                                            "Credit : ₹ ${controller.getData[index]['credit']} - Debit : ₹ ${controller.getData[index]['debit']}",
-                                            style: Theme.of(context).poppinsRegular.copyWith(fontSize: 12),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(width: 10),
-                                    Text("₹ ${controller.getData[index]['balance']}", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18)),
-                                  ],
+                                      SizedBox(width: 10),
+                                      Text("₹ ${controller.getData[index]['balance']}", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-              SliverToBoxAdapter(child: SizedBox(height: 180))
-            ],
+                          );
+                        },
+                      ),
+                SliverToBoxAdapter(child: SizedBox(height: 180))
+              ],
+            ),
           ),
 
           // Column(
@@ -898,7 +901,7 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget buildFloating(context, controller, double shrinkOffset) {
+  Widget buildFloating(context, MyController controller, double shrinkOffset) {
     final double progress = (shrinkOffset / expandedHeight).clamp(0.0, 1.0);
 
     final double baseHeight = expandedHeight / 1.6;
