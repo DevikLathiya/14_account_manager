@@ -36,13 +36,17 @@ dependencies:
   cupertino_icons: ^1.0.8
   hive: ^2.2.3
   sqflite: ^2.2.6
-  csc_picker: ^0.2.7
   path_provider: ^2.0.14
   hive_flutter:
-  fluttertoast: ^8.2.1
   get:
   getwidget: ^7.0.0
   flutter_slidable: ^4.0.1
+  google_sign_in: ^6.1.5
+  googleapis: ^11.4.0
+  http: ^1.1.0
+  connectivity_plus: ^5.0.2
+  file_picker: ^11.0.2
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -54,8 +58,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
-  hive_generator:
-  build_runner:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

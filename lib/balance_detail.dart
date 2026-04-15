@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:getwidget/components/button/gf_button.dart';
 import 'package:getwidget/shape/gf_button_shape.dart';
 import 'package:getwidget/types/gf_button_type.dart';
-import 'Controller Screen/GetXController.dart';
+import 'Controller Screen/database_controller.dart';
+import 'Controller Screen/sync_controller.dart';
+import 'Controller Screen/balance_detail_controller.dart';
 
 class BalanceDetailScreen extends StatefulWidget {
   final Map<dynamic, dynamic> person;
@@ -652,9 +654,12 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
 
                       if (date != '') {
                         await controller.transUpdate(tid, date, detail, credit, debit);
-                        await controller.getTransaction(widget.person['id']);
                       } else {
-                        controller.insertBalanceData(widget.person['id'], detail, credit, debit);
+                        await controller.insertBalanceData(widget.person['id'], detail, credit, debit);
+                      }
+                      await controller.getTransaction(widget.person['id']);
+                      if (Get.isRegistered<SyncController>()) {
+                        Get.find<SyncController>().autoSyncEnabled.value ? Get.find<SyncController>().syncNow() : null;
                       }
                       _particular.clear();
                       controller.group.value = "";
