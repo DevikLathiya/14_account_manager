@@ -20,20 +20,24 @@ class SettingsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: Colors.grey.shade50,
           appBar: AppBar(
+            toolbarHeight: 65,
             centerTitle: true,
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(40),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30),
-                child: Text(
-                  'Settings',
-                  style: TextStyle(fontFamily: Fonts.poppinsSemiBold, color: MyColors.white, fontSize: 20),
+            title: const Text(
+              'Settings',
+              style: TextStyle(fontFamily: Fonts.poppinsSemiBold, color: Colors.white, fontSize: 18, letterSpacing: 0.5),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [MyColors.primaryColor, Color.lerp(MyColors.primaryColor, const Color(0xFF1E2432), 0.35)!],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
+                boxShadow: [BoxShadow(color: MyColors.primaryColor.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))],
               ),
             ),
-
-            backgroundColor: MyColors.primaryColor,
-            elevation: 0,
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 120),
@@ -153,14 +157,14 @@ class SettingsScreen extends StatelessWidget {
                                 Icon(
                                   syncController.autoSyncEnabled.value ? Icons.sync_rounded : Icons.sync_disabled_rounded,
                                   color: syncController.autoSyncEnabled.value ? Colors.teal.shade600 : Colors.grey.shade600,
-                                  size: 16,
+                                  size: 18,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Auto-Sync: ${syncController.autoSyncEnabled.value ? "ON" : "OFF"}',
                                   style: TextStyle(
-                                    fontFamily: Fonts.poppinsMedium,
-                                    fontSize: 11,
+                                    fontFamily: Fonts.poppinsSemiBold,
+                                    fontSize: 12,
                                     color: syncController.autoSyncEnabled.value ? Colors.teal.shade700 : Colors.grey.shade700,
                                   ),
                                 ),
@@ -186,22 +190,12 @@ class SettingsScreen extends StatelessWidget {
                                   const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF1F3F4)),
 
                                   // Auto-sync row
-                                  ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                                    onTap: () => syncController.toggleAutoSync(!syncController.autoSyncEnabled.value),
-                                    leading: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10)),
-                                      child: const Icon(Icons.sync_rounded, color: Colors.teal, size: 20),
-                                    ),
-                                    title: const Text(
-                                      'Auto-Sync',
-                                      style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 14, color: Colors.black87),
-                                    ),
-                                    subtitle: const Text(
-                                      'Sync changes to Drive when online',
-                                      style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 11, color: Colors.grey),
-                                    ),
+                                  _commonListTile(
+                                    context: context,
+                                    title: 'Auto-Sync',
+                                    subtitle: 'Sync changes to Drive when online',
+                                    icon: Icons.sync_rounded,
+                                    color: Colors.teal,
                                     trailing: Transform.scale(
                                       scale: 0.8,
                                       alignment: Alignment.centerRight,
@@ -216,8 +210,15 @@ class SettingsScreen extends StatelessWidget {
                                   const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFF1F3F4)),
 
                                   // Backup Now
-                                  ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                  _commonListTile(
+                                    context: context,
+                                    title: 'Backup Now',
+                                    subtitle: 'Manually upload local database to Drive',
+                                    icon: Icons.cloud_upload_rounded,
+                                    color: Colors.blue,
+                                    trailing: syncController.isLoadingBackup.value
+                                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                        : null,
                                     onTap: syncController.isLoadingBackup.value
                                         ? null
                                         : () async {
@@ -235,26 +236,19 @@ class SettingsScreen extends StatelessWidget {
                                               syncController.isLoadingBackup.value = false;
                                             }
                                           },
-                                    leading: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10)),
-                                      child: const Icon(Icons.cloud_upload_rounded, color: Colors.blue, size: 20),
-                                    ),
-                                    title: const Text(
-                                      'Backup Now',
-                                      style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.black87),
-                                    ),
-                                    subtitle: Text(
-                                      'Manually upload local database to Drive',
-                                      style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                                    ),
-                                    trailing: syncController.isLoadingBackup.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : null,
                                   ),
                                   const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFF1F3F4)),
 
                                   // Restore Now
-                                  ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                                  _commonListTile(
+                                    context: context,
+                                    title: 'Restore Now',
+                                    subtitle: 'Replace local database with Drive backup',
+                                    icon: Icons.cloud_download_rounded,
+                                    color: Colors.indigo,
+                                    trailing: syncController.isLoadingRestore.value
+                                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                        : null,
                                     onTap: syncController.isLoadingRestore.value
                                         ? null
                                         : () async {
@@ -277,22 +271,6 @@ class SettingsScreen extends StatelessWidget {
                                               syncController.isLoadingRestore.value = false;
                                             }
                                           },
-                                    leading: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(color: Colors.indigo.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10)),
-                                      child: const Icon(Icons.cloud_download_rounded, color: Colors.indigo, size: 20),
-                                    ),
-                                    title: const Text(
-                                      'Restore Now',
-                                      style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.black87),
-                                    ),
-                                    subtitle: Text(
-                                      'Replace local database with Drive backup',
-                                      style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                                    ),
-                                    trailing: syncController.isLoadingRestore.value
-                                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                                        : null,
                                   ),
 
                                   if (syncController.lastSynced.value != null) ...[
@@ -332,21 +310,12 @@ class SettingsScreen extends StatelessWidget {
                       final securityController = Get.find<SecurityController>();
                       return Column(
                         children: [
-                          ListTile(
-                            onTap: () => securityController.toggleBiometricLock(!securityController.isBiometricLockEnabled.value),
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: MyColors.primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                              child: Icon(Icons.fingerprint_rounded, color: MyColors.primaryColor, size: 20),
-                            ),
-                            title: Text(
-                              'Fingerprint Unlock',
-                              style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.black87),
-                            ),
-                            subtitle: Text(
-                              'Enable biometric as an alternative to PIN',
-                              style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                            ),
+                          _commonListTile(
+                            context: context,
+                            title: 'Biometric Unlock',
+                            subtitle: 'Enable biometric as an alternative to PIN',
+                            icon: Icons.fingerprint_rounded,
+                            color: Colors.deepOrange.shade900,
                             trailing: Transform.scale(
                               scale: 0.8,
                               alignment: Alignment.centerRight,
@@ -359,20 +328,12 @@ class SettingsScreen extends StatelessWidget {
                             ),
                           ),
                           const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFF1F3F4)),
-                          ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: MyColors.primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                              child: Icon(Icons.lock_open_rounded, color: MyColors.primaryColor, size: 20),
-                            ),
-                            title: Text(
-                              'Change Security PIN',
-                              style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.black87),
-                            ),
-                            subtitle: Text(
-                              'Update your 4-digit access PIN',
-                              style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                            ),
+                          _commonListTile(
+                            context: context,
+                            title: 'Change Security PIN',
+                            subtitle: 'Update your 4-digit access PIN',
+                            icon: Icons.lock_rounded,
+                            color: Colors.brown,
                             onTap: () => securityController.promptChangePin(context),
                           ),
                         ],
@@ -385,54 +346,30 @@ class SettingsScreen extends StatelessWidget {
                 _buildSectionHeader(context, 'Data Management'),
                 _buildSectionCard(
                   children: [
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.blueAccent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.upload_file_rounded, color: Colors.blueAccent, size: 20),
-                      ),
-                      title: Text(
-                        'Export Data',
-                        style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.black87),
-                      ),
-                      subtitle: Text(
-                        'Save accounts & statements as JSON file',
-                        style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                      ),
+                    _commonListTile(
+                      context: context,
+                      title: 'Export Data',
+                      subtitle: 'Save accounts & statements as file',
+                      icon: Icons.file_upload_rounded,
+                      color: Colors.deepOrange,
                       onTap: () => dbController.exportData(context),
                     ),
                     const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFF1F3F4)),
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.download_rounded, color: Colors.green, size: 20),
-                      ),
-                      title: Text(
-                        'Import Data',
-                        style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: Colors.black87),
-                      ),
-                      subtitle: Text(
-                        'Import data from JSON file',
-                        style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                      ),
+                    _commonListTile(
+                      context: context,
+                      title: 'Import Data',
+                      subtitle: 'Import data from JSON file',
+                      icon: Icons.file_download_rounded,
+                      color: Colors.green,
                       onTap: () => dbController.importData(context),
                     ),
                     const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFF1F3F4)),
-                    ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.redAccent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 20),
-                      ),
-                      title: Text(
-                        'Delete All Data',
-                        style: TextStyle(fontFamily: Fonts.poppinsMedium, color: Colors.redAccent, fontSize: 15),
-                      ),
-                      subtitle: Text(
-                        'Permanently clear local & Drive storage data',
-                        style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
-                      ),
+                    _commonListTile(
+                      context: context,
+                      title: 'Delete All Data',
+                      subtitle: 'Permanently remove all data',
+                      icon: Icons.delete_forever_rounded,
+                      color: Colors.redAccent,
                       onTap: () => dbController.promptDeleteAllData(context),
                     ),
                   ],
@@ -442,6 +379,34 @@ class SettingsScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  ListTile _commonListTile({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    Function()? onTap,
+    Widget? trailing,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+        child: Icon(icon, color: color, size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 15, color: icon == Icons.delete_forever_rounded ? Colors.redAccent : Colors.black87),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 12, color: Colors.grey.shade500),
+      ),
+      onTap: onTap,
+      trailing: trailing,
     );
   }
 

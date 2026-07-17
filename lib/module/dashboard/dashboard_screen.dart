@@ -27,134 +27,120 @@ class _DashboardScreenState extends State<DashboardScreen> {
           backgroundColor: Colors.grey.shade50,
           body: RefreshIndicator(
             onRefresh: () => controller.dataBaseController.selectData(),
-            child: CustomScrollView(
-              controller: controller.scrollController,
-              physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-              slivers: [
-                SliverPersistentHeader(floating: false, pinned: true, delegate: CustomSliverAppBarDelegate(expandedHeight: 250, controller: controller)),
-                SliverList(delegate: SliverChildListDelegate([SizedBox(height: 60), SizedBox()])),
+            child: SlidableAutoCloseBehavior(
+              child: CustomScrollView(
+                controller: controller.scrollController,
+                physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                slivers: [
+                  SliverPersistentHeader(floating: false, pinned: true, delegate: CustomSliverAppBarDelegate(expandedHeight: 230, controller: controller)),
+                  SliverList(delegate: SliverChildListDelegate([SizedBox(height: 60), SizedBox()])),
 
-                controller.getData.isEmpty
-                    ? SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.warning, color: Colors.red, size: 50),
-                              Text("No Data Found", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20)),
-                              SizedBox(height: 4),
-                              Text("Click On Add Button to add Account.", style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
-                            ],
-                          ),
-                        ),
-                      )
-                    : SliverList.separated(
-                        itemCount: controller.getData.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final account = controller.getData[index];
-                          return SizedBox(
-                            child: Slidable(
-                              key: ValueKey(account.id),
-                              endActionPane: ActionPane(
-                                motion: ScrollMotion(),
-                                extentRatio: 0.25,
-                                openThreshold: 0.2,
-                                children: [
-                                  SlidableAction(
-                                    onPressed: (context) => controller.accountDialog(context, account.id, account.name),
-                                    icon: Icons.edit,
-                                    autoClose: true,
-                                    padding: EdgeInsets.zero,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  SizedBox(width: 10),
-                                  SlidableAction(
-                                    onPressed: (context) => deleteAccountDialog(context, account, controller),
-                                    backgroundColor: Colors.red.shade300,
-                                    icon: Icons.delete,
-                                    autoClose: true,
-                                    padding: EdgeInsets.zero,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  SizedBox(width: 10),
-                                ],
-                              ),
-                              child: Obx(() {
-                                final String name = account.name;
-                                final String firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
-
-                                final int colorIndex = index % controller.avatarBgColors.length;
-                                final Color bg = controller.avatarBgColors[colorIndex];
-                                final Color textCol = controller.avatarTextColors[colorIndex];
-
-                                final double balance = account.balance;
-                                final String absBalStr = balance.abs() % 1 == 0 ? balance.abs().toStringAsFixed(0) : balance.abs().toStringAsFixed(2);
-                                final String displayBalance = controller.isAmountVisible.value ? "${balance < 0 ? '-' : ''}₹$absBalStr" : "₹••••";
-
-                                final double credit = account.credit;
-                                final double debit = account.debit;
-                                final bool showBadge = credit != debit;
-                                final bool isCreditMore = credit > debit;
-
-                                return GestureDetector(
-                                  onTap: () => Get.to(BalanceDetailScreen(account))?.then((value) => controller.dataBaseController.selectData()),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                                    decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 48,
-                                          height: 48,
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-                                          child: Text(
-                                            firstLetter,
-                                            style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20, color: textCol, fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Text(
-                                            name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context).poppinsMedium.copyWith(fontSize: 17, color: Colors.black87),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          displayBalance,
-                                          style: Theme.of(context).poppinsMedium.copyWith(fontSize: 16, fontWeight: FontWeight.bold, color: MyColors.primaryColor),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        if (showBadge)
-                                          Container(
-                                            alignment: Alignment.center,
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: isCreditMore ? const Color(0xFFD4F1D4) : const Color(0xFFF8D8D0),
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              isCreditMore ? "+" : "-",
-                                              style: TextStyle(color: isCreditMore ? const Color(0xFF2E7D32) : const Color(0xFFC62828), fontWeight: FontWeight.bold, fontSize: 14),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }),
+                  controller.getData.isEmpty
+                      ? SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.warning, color: Colors.red, size: 50),
+                                Text("No Data Found", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20)),
+                                SizedBox(height: 4),
+                                Text("Click On Add Button to add Account.", style: Theme.of(context).poppinsRegular.copyWith(fontSize: 14)),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-                SliverToBoxAdapter(child: SizedBox(height: 180)),
-              ],
+                          ),
+                        )
+                      : SliverList.separated(
+                          itemCount: controller.getData.length,
+                          separatorBuilder: (context, index) => SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final account = controller.getData[index];
+                            return SizedBox(
+                              child: Slidable(
+                                key: ValueKey(account.id),
+                                endActionPane: ActionPane(
+                                  motion: ScrollMotion(),
+                                  extentRatio: 0.28,
+                                  openThreshold: 0.2,
+                                  children: [
+                                    CustomSlidableAction(
+                                      onPressed: (context) => controller.accountDialog(context, account.id, account.name),
+                                      backgroundColor: Colors.transparent,
+                                      padding: EdgeInsets.symmetric(vertical: 6),
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(vertical: 4),
+                                        decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(10)),
+                                        alignment: Alignment.center,
+                                        child: Icon(Icons.edit, color: MyColors.primaryColor, size: 20),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    CustomSlidableAction(
+                                      onPressed: (context) => deleteAccountDialog(context, account, controller),
+                                      backgroundColor: Colors.transparent,
+                                      padding: EdgeInsets.symmetric(vertical: 6),
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(vertical: 4),
+                                        decoration: BoxDecoration(color: Colors.red.shade300, borderRadius: BorderRadius.circular(10)),
+                                        alignment: Alignment.center,
+                                        child: const Icon(Icons.delete, color: Colors.white, size: 20),
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                  ],
+                                ),
+                                child: Obx(() {
+                                  final String name = account.name;
+                                  final String firstLetter = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+                                  final int colorIndex = index % controller.avatarBgColors.length;
+                                  final Color bg = controller.avatarBgColors[colorIndex];
+                                  final Color textCol = controller.avatarTextColors[colorIndex];
+
+                                  final double balance = account.balance;
+                                  final String displayBalance = controller.isAmountVisible.value
+                                      ? "${balance < 0 ? '-' : ''}₹${AppFormat.indianNumber(balance)}"
+                                      : "₹••••";
+
+                                  return GestureDetector(
+                                    onTap: () => Get.to(BalanceDetailScreen(account))?.then((value) => controller.dataBaseController.selectData()),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                                      decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 46,
+                                            height: 46,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+                                            child: Text(
+                                              firstLetter,
+                                              style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20, color: textCol, fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 14),
+                                          Expanded(
+                                            child: Text(name, maxLines: 1, style: Theme.of(context).poppinsMedium.copyWith(fontSize: 16, color: Colors.black87)),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            displayBalance,
+                                            style: Theme.of(context).poppinsMedium.copyWith(fontSize: 16, fontWeight: FontWeight.bold, color: MyColors.primaryColor),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            );
+                          },
+                        ),
+                  SliverToBoxAdapter(child: SizedBox(height: 180)),
+                ],
+              ),
             ),
           ),
         );
@@ -190,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
               ),
-    
+
               // Dialog Content
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -265,7 +251,7 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final double floatingHeight = 120;
+    final double floatingHeight = 100;
     final double maxPadding = 20;
     final double minPadding = 0;
 
@@ -291,28 +277,15 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       child: Container(
         height: expandedHeight,
         width: Get.width,
+        alignment: Alignment.center,
         padding: const EdgeInsets.only(bottom: 60),
         decoration: BoxDecoration(
           color: MyColors.primaryColor,
-          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(50), bottomRight: Radius.circular(50)),
+          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Text(
-              "DashBoard",
-              style: TextStyle(fontFamily: Fonts.poppinsSemiBold, color: MyColors.white, fontSize: 20),
-            ),
-            Positioned(
-              right: 24,
-              child: Obx(
-                () => IconButton(
-                  icon: Icon(controller.isAmountVisible.value ? Icons.visibility : Icons.visibility_off, color: Colors.white, size: 24),
-                  onPressed: () => controller.toggleAmountVisibility(),
-                ),
-              ),
-            ),
-          ],
+        child: Text(
+          "DashBoard",
+          style: TextStyle(fontFamily: Fonts.poppinsSemiBold, color: MyColors.white, fontSize: 20),
         ),
       ),
     );
@@ -342,12 +315,19 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
           children: [
             Text("Overall Balance", style: Theme.of(context).poppinsMedium.copyWith(fontSize: 18, color: MyColors.primaryColor)),
             const SizedBox(height: 6),
-
-            Text(
-              controller.isAmountVisible.value
-                  ? ((controller.dataBaseController.mainBalance.value == '') ? "₹00" : "₹ ${controller.dataBaseController.mainBalance.value}")
-                  : "₹ ••••",
-              style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20, color: MyColors.primaryColor),
+            GestureDetector(
+              onTap: () => controller.toggleAmountVisibility(),
+              child: Text(
+                () {
+                  final double valDouble = double.tryParse(controller.dataBaseController.mainBalance.value) ?? 0.0;
+                  return controller.isAmountVisible.value
+                      ? ((controller.dataBaseController.mainBalance.value == '')
+                          ? "₹00"
+                          : "${valDouble < 0 ? '-' : ''}₹ ${AppFormat.indianNumber(valDouble)}")
+                      : "₹ ••••";
+                }(),
+                style: Theme.of(context).poppinsMedium.copyWith(fontSize: 20, color: MyColors.primaryColor),
+              ),
             ),
             SizedBox(height: 16),
 
@@ -361,7 +341,14 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
                   Expanded(
                     child: Text(
                       textAlign: TextAlign.center,
-                      controller.isAmountVisible.value ? ((controller.dataBaseController.cr.value == "null") ? "₹00" : "₹ ${controller.dataBaseController.cr.value}") : "₹ ••••",
+                      () {
+                        final double valDouble = double.tryParse(controller.dataBaseController.cr.value) ?? 0.0;
+                        return controller.isAmountVisible.value
+                            ? ((controller.dataBaseController.cr.value == "null" || controller.dataBaseController.cr.value == "")
+                                ? "₹00"
+                                : "${valDouble < 0 ? '-' : ''}₹ ${AppFormat.indianNumber(valDouble)}")
+                            : "₹ ••••";
+                      }(),
                       style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.green),
                     ),
                   ),
@@ -371,7 +358,14 @@ class CustomSliverAppBarDelegate extends SliverPersistentHeaderDelegate {
                   Expanded(
                     child: Text(
                       textAlign: TextAlign.center,
-                      controller.isAmountVisible.value ? ((controller.dataBaseController.de.value == "null") ? "₹00" : "₹ ${controller.dataBaseController.de.value}") : "₹ ••••",
+                      () {
+                        final double valDouble = double.tryParse(controller.dataBaseController.de.value) ?? 0.0;
+                        return controller.isAmountVisible.value
+                            ? ((controller.dataBaseController.de.value == "null" || controller.dataBaseController.de.value == "")
+                                ? "₹00"
+                                : "${valDouble < 0 ? '-' : ''}₹ ${AppFormat.indianNumber(valDouble)}")
+                            : "₹ ••••";
+                      }(),
                       style: Theme.of(context).poppinsMedium.copyWith(fontSize: 14, color: Colors.red),
                     ),
                   ),

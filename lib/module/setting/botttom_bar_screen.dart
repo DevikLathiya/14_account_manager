@@ -54,7 +54,7 @@ class BottomBarScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(30),
@@ -141,15 +141,12 @@ class BottomBarScreen extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutBack,
                 builder: (context, value, child) {
-                  return Transform.rotate(
-                    angle: value * 0.15,
-                    child: Transform.scale(
-                      scale: 1.0 + (value * 0.1),
-                      child: Icon(
-                        icon,
-                        color: isSelected ? MyColors.white : MyColors.grey,
-                        size: 20,
-                      ),
+                  return Transform.scale(
+                    scale: 1.0 + (value * 0.1),
+                    child: Icon(
+                      icon,
+                      color: isSelected ? MyColors.white : MyColors.grey,
+                      size: 20,
                     ),
                   );
                 },

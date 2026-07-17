@@ -192,46 +192,51 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                           InkWell(
                                             onTap: () => editDeleteDialog(context, isCredit, amountStr, item, controller),
                                             child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                                              color: Colors.white,
+                                              padding: const EdgeInsets.fromLTRB(6, 10, 0, 10),
+                                              color: const Color.fromARGB(255, 135, 68, 68),
                                               child: Row(
                                                 children: [
                                                   // Amount Column
                                                   Expanded(
                                                     child: Center(
                                                       child: Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                         decoration: BoxDecoration(
                                                           color: isCredit ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
-                                                          borderRadius: BorderRadius.circular(12),
+                                                          borderRadius: BorderRadius.circular(8),
                                                         ),
-                                                        child: Text(
-                                                          "${isCredit ? '+' : '-'} ₹$amountStr",
-                                                          style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 13, color: tColor),
+                                                        child: FittedBox(
+                                                          fit: BoxFit.scaleDown,
+                                                          child: Text(
+                                                            "${isCredit ? '+' : '-'} ₹${AppFormat.indianNumber(amountDouble)}",
+                                                            style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 12, color: tColor),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
                                                   ),
-
+ 
                                                   // Particular Column
                                                   Expanded(
                                                     flex: 2,
                                                     child: Center(
                                                       child: Text(
                                                         item.detail,
+                                                        textAlign: TextAlign.center,
                                                         overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 13, color: MyColors.primaryColor),
-                                                        maxLines: 1,
+                                                        style: TextStyle(fontFamily: Fonts.poppinsMedium, fontSize: 12, color: MyColors.primaryColor),
+                                                        maxLines: 2,
                                                       ),
                                                     ),
                                                   ),
-
+ 
                                                   // Running Balance Column
                                                   Expanded(
-                                                    child: Center(
+                                                    child: FittedBox(
+                                                      fit: BoxFit.scaleDown,
                                                       child: Text(
-                                                        "₹$balStr",
-                                                        style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 14, color: MyColors.primaryColor),
+                                                        "${bal < 0 ? '-' : ''}₹${AppFormat.indianNumber(bal)}",
+                                                        style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 12, color: MyColors.primaryColor),
                                                       ),
                                                     ),
                                                   ),
@@ -283,9 +288,8 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                   : (temp)
                                   ? (double.tryParse("${controller.totalTrans[0]['sum_cre']}") ?? 0.0)
                                   : widget.person.credit;
-                              final valStr = (valDouble % 1 == 0) ? valDouble.toStringAsFixed(0) : valDouble.toStringAsFixed(2);
                               return Text(
-                                "₹$valStr",
+                                "${valDouble < 0 ? '-' : ''}₹${AppFormat.indianNumber(valDouble)}",
                                 style: const TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 15, color: Color(0xFF2E7D32)),
                               );
                             }),
@@ -310,9 +314,8 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                   : (temp)
                                   ? (double.tryParse("${controller.totalTrans[0]['sum_deb']}") ?? 0.0)
                                   : widget.person.debit;
-                              final valStr = (valDouble % 1 == 0) ? valDouble.toStringAsFixed(0) : valDouble.toStringAsFixed(2);
                               return Text(
-                                "₹$valStr",
+                                "${valDouble < 0 ? '-' : ''}₹${AppFormat.indianNumber(valDouble)}",
                                 style: const TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 15, color: Color(0xFFC62828)),
                               );
                             }),
@@ -335,9 +338,8 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                               Obx(() {
                                 controller.credit.value;
                                 final double valDouble = (temp) ? (double.tryParse(controller.totalBalance.value) ?? 0.0) : widget.person.balance;
-                                final valStr = (valDouble % 1 == 0) ? valDouble.toStringAsFixed(0) : valDouble.toStringAsFixed(2);
                                 return Text(
-                                  "₹$valStr",
+                                  "${valDouble < 0 ? '-' : ''}₹${AppFormat.indianNumber(valDouble)}",
                                   style: const TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 16, color: Colors.white),
                                 );
                               }),
@@ -385,7 +387,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
             ],
           );
         }
-    
+
         return Dialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -397,45 +399,28 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  color: isCredit ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
-                ),
+                decoration: BoxDecoration(color: isCredit ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE)),
                 child: Column(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
+                      decoration: BoxDecoration(color: isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828), shape: BoxShape.circle),
+                      child: Icon(isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded, color: Colors.white, size: 26),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       isCredit ? "Credit Transaction" : "Debit Transaction",
-                      style: TextStyle(
-                        fontFamily: Fonts.poppinsSemiBold,
-                        fontSize: 13,
-                        color: isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
-                      ),
+                      style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 13, color: isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828)),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "${isCredit ? '+' : '-'} ₹$amountStr",
-                      style: TextStyle(
-                        fontFamily: Fonts.poppinsSemiBold,
-                        fontSize: 28,
-                        color: isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
-                      ),
+                      "${isCredit ? '+' : '-'} ₹${AppFormat.indianNumber(double.tryParse(amountStr) ?? 0.0)}",
+                      style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 28, color: isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828)),
                     ),
                   ],
                 ),
               ),
-    
+
               // Transaction Information details
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -446,7 +431,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                     const SizedBox(height: 16),
                     buildDetailRow("Particulars / Description", item.detail, Icons.description_outlined),
                     const SizedBox(height: 28),
-    
+
                     // Edit & Delete Action Buttons
                     Row(
                       children: [
@@ -479,20 +464,11 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                           color: const Color(0xFFFFEBEE),
                                           child: Column(
                                             children: [
-                                              const Icon(
-                                                Icons.warning_amber_rounded,
-                                                color: Color(0xFFC62828),
-                                                size: 32,
-                                              ),
+                                              const Icon(Icons.warning_amber_rounded, color: Color(0xFFC62828), size: 32),
                                               const SizedBox(height: 8),
                                               const Text(
                                                 "Delete Transaction?",
-                                                style: TextStyle(
-                                                  fontFamily: Fonts.poppinsSemiBold,
-                                                  fontSize: 18,
-                                                  color: Color(0xFFC62828),
-                                                  letterSpacing: 0.3,
-                                                ),
+                                                style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 18, color: Color(0xFFC62828), letterSpacing: 0.3),
                                               ),
                                             ],
                                           ),
@@ -507,12 +483,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                               const Text(
                                                 "Are you sure you want to delete this transaction permanently? This action cannot be undone.",
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontFamily: Fonts.poppinsRegular,
-                                                  fontSize: 14,
-                                                  color: Colors.black87,
-                                                  height: 1.5,
-                                                ),
+                                                style: TextStyle(fontFamily: Fonts.poppinsRegular, fontSize: 14, color: Colors.black87, height: 1.5),
                                               ),
                                               const SizedBox(height: 24),
                                               Row(
@@ -569,7 +540,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-    
+
                         // Edit Button
                         Expanded(
                           child: ElevatedButton(
@@ -605,7 +576,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -645,20 +616,11 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                   width: double.infinity,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [MyColors.primaryColor, MyColors.primaryColor.withValues(alpha: 0.85)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    gradient: LinearGradient(colors: [MyColors.primaryColor, MyColors.primaryColor.withValues(alpha: 0.85)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                   ),
                   child: Text(
                     (date != '') ? "Edit Transaction" : "Add Transaction",
-                    style: TextStyle(
-                      fontFamily: Fonts.poppinsSemiBold,
-                      fontSize: 18,
-                      color: Colors.white,
-                      letterSpacing: 0.3,
-                    ),
+                    style: TextStyle(fontFamily: Fonts.poppinsSemiBold, fontSize: 18, color: Colors.white, letterSpacing: 0.3),
                   ),
                 ),
 
@@ -720,36 +682,21 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: controller.group.value == "Credit"
-                                        ? const Color(0xFFE8F5E9)
-                                        : Colors.grey.shade50,
+                                    color: controller.group.value == "Credit" ? const Color(0xFFE8F5E9) : Colors.grey.shade50,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: controller.group.value == "Credit"
-                                          ? const Color(0xFF2E7D32)
-                                          : Colors.grey.shade200,
-                                      width: 1.5,
-                                    ),
+                                    border: Border.all(color: controller.group.value == "Credit" ? const Color(0xFF2E7D32) : Colors.grey.shade200, width: 1.5),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
-                                        Icons.add_circle_outline_rounded,
-                                        color: controller.group.value == "Credit"
-                                            ? const Color(0xFF2E7D32)
-                                            : Colors.grey.shade600,
-                                        size: 18,
-                                      ),
+                                      Icon(Icons.add_circle_outline_rounded, color: controller.group.value == "Credit" ? const Color(0xFF2E7D32) : Colors.grey.shade600, size: 18),
                                       const SizedBox(width: 8),
                                       Text(
                                         "Credit (+)",
                                         style: TextStyle(
                                           fontFamily: Fonts.poppinsMedium,
                                           fontSize: 14,
-                                          color: controller.group.value == "Credit"
-                                              ? const Color(0xFF2E7D32)
-                                              : Colors.grey.shade700,
+                                          color: controller.group.value == "Credit" ? const Color(0xFF2E7D32) : Colors.grey.shade700,
                                         ),
                                       ),
                                     ],
@@ -766,25 +713,16 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: controller.group.value == "Debit"
-                                        ? const Color(0xFFFFEBEE)
-                                        : Colors.grey.shade50,
+                                    color: controller.group.value == "Debit" ? const Color(0xFFFFEBEE) : Colors.grey.shade50,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: controller.group.value == "Debit"
-                                          ? const Color(0xFFC62828)
-                                          : Colors.grey.shade200,
-                                      width: 1.5,
-                                    ),
+                                    border: Border.all(color: controller.group.value == "Debit" ? const Color(0xFFC62828) : Colors.grey.shade200, width: 1.5),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.remove_circle_outline_rounded,
-                                        color: controller.group.value == "Debit"
-                                            ? const Color(0xFFC62828)
-                                            : Colors.grey.shade600,
+                                        color: controller.group.value == "Debit" ? const Color(0xFFC62828) : Colors.grey.shade600,
                                         size: 18,
                                       ),
                                       const SizedBox(width: 8),
@@ -793,9 +731,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                         style: TextStyle(
                                           fontFamily: Fonts.poppinsMedium,
                                           fontSize: 14,
-                                          color: controller.group.value == "Debit"
-                                              ? const Color(0xFFC62828)
-                                              : Colors.grey.shade700,
+                                          color: controller.group.value == "Debit" ? const Color(0xFFC62828) : Colors.grey.shade700,
                                         ),
                                       ),
                                     ],
@@ -818,11 +754,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                         const SizedBox(height: 16),
 
                         // Particular Field
-                        AppTextField(
-                          controller: _particular,
-                          labelText: "Particular (Remarks)",
-                          prefixIcon: Icons.description_outlined,
-                        ),
+                        AppTextField(controller: _particular, labelText: "Particular (Remarks)", prefixIcon: Icons.description_outlined),
                         const SizedBox(height: 24),
 
                         // Buttons

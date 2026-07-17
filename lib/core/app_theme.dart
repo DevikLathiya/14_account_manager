@@ -1,4 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+class AppFormat {
+  AppFormat._();
+
+  static String indianNumber(double amount) {
+    final double absAmount = amount.abs();
+    final formatter = absAmount % 1 == 0
+        ? NumberFormat('#,##,##0', 'en_IN')
+        : NumberFormat('#,##,##0.00', 'en_IN');
+    return formatter.format(absAmount);
+  }
+}
 
 class AppTheme {
   AppTheme._();
