@@ -39,7 +39,6 @@ dependencies:
   path_provider: ^2.0.14
   hive_flutter:
   get:
-  getwidget: ^7.0.0
   flutter_slidable: ^4.0.1
   google_sign_in: ^6.1.5
   googleapis: ^11.4.0
@@ -47,6 +46,8 @@ dependencies:
   connectivity_plus: ^5.0.2
   file_picker: ^11.0.2
   intl: ^0.20.2
+  local_auth: ^2.1.8
+  crypto: ^3.0.3
 
 dev_dependencies:
   flutter_test:

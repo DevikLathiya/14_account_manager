@@ -1,8 +1,11 @@
+import 'package:account_manager/model/transaction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math';
-import '../splash_screen.dart';
-import 'sync_controller.dart';
+import '../auth_flow/splash_screen.dart';
+import '../service/sync_controller.dart';
+
+import '../../core/app_theme.dart';
 
 class BalanceController extends GetxController {
   RxString group = "".obs;
@@ -15,7 +18,7 @@ class BalanceController extends GetxController {
   RxString credit = ''.obs;
   RxString totalBalance = ''.obs;
 
-  RxList<Map<String, dynamic>> trData = RxList<Map<String, dynamic>>([]);
+  RxList<TransactionModel> trData = RxList<TransactionModel>([]);
 
   myDate() => today.value = "${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
 
@@ -35,7 +38,8 @@ class BalanceController extends GetxController {
 
   Future<void> getTransaction(int id) async {
     String select = "select * from MyTransaction where AcId='$id' and is_deleted=0 order by updated_at desc";
-    trData.value = await SplashScreen.database!.rawQuery(select);
+    final List<Map<String, dynamic>> maps = await SplashScreen.database!.rawQuery(select);
+    trData.value = maps.map((map) => TransactionModel.fromMap(map)).toList();
 
     // if (trData.isNotEmpty) {
     totalCreDeb(id);
@@ -89,12 +93,33 @@ class BalanceController extends GetxController {
   }
 
   Future<void> datePickerBox(BuildContext context) async {
-    today.value = "${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
-    pickDate = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.utc(1980), lastDate: DateTime.now());
+    DateTime initial = DateTime.now();
+    if (today.value.isNotEmpty) {
+      try {
+        final parts = today.value.split('/');
+        if (parts.length == 3) {
+          initial = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+        }
+      } catch (_) {}
+    }
 
-    if (pickDate == null) {
-      today.value = "${todayDate!.day}/${todayDate!.month}/${todayDate!.year}";
-    } else {
+    pickDate = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime.utc(1980),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(primary: MyColors.primaryColor, onPrimary: Colors.white, onSurface: Colors.black87),
+            textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: MyColors.primaryColor)),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickDate != null) {
       today.value = "${pickDate!.day}/${pickDate!.month}/${pickDate!.year}";
     }
   }

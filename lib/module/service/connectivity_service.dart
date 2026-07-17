@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
-import '../Controller Screen/sync_controller.dart';
-import '../splash_screen.dart';
+import 'sync_controller.dart';
+import '../auth_flow/splash_screen.dart';
 
 class ConnectivityService extends GetxService {
   late StreamSubscription<ConnectivityResult> _subscription;

@@ -1,9 +1,9 @@
 import 'package:account_manager/core/app_theme.dart';
-import 'package:account_manager/dashboard_screen.dart';
+import 'package:account_manager/module/auth_flow/unlock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
-import 'Controller Screen/database_controller.dart';
+import '../service/database_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   static Database? database;
@@ -38,7 +38,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Wait for at least 2 seconds for splash visibility
     await Future.delayed(const Duration(seconds: 2));
 
-    Get.offAll(() => const DashboardScreen());
+    // We always redirect to the UnlockScreen. It will determine if the app 
+    // needs to set up a new password or prompt to unlock.
+    Get.offAll(() => const UnlockScreen());
   }
 
   Future<void> _initDatabase() async {

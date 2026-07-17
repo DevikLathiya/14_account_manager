@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:account_manager/core/app_encryption.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'dart:io' show Platform;
@@ -6,7 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
-import '../splash_screen.dart';
+import '../auth_flow/splash_screen.dart';
 import 'database_controller.dart';
 
 class GoogleAuthClient extends http.BaseClient {
@@ -23,7 +24,7 @@ class GoogleAuthClient extends http.BaseClient {
 
 class SyncController extends GetxController {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [drive.DriveApi.driveAppdataScope],
+    scopes: [drive.DriveApi.driveFileScope],
     clientId: Platform.isIOS ? '1018183671952-gp709t4r7r1shamol9qmeu85in7tvufm.apps.googleusercontent.com' : null,
   );
 
@@ -31,6 +32,7 @@ class SyncController extends GetxController {
   RxBool autoSyncEnabled = false.obs;
   Rx<DateTime?> lastSynced = Rx<DateTime?>(null);
   RxBool isLoadingRestore = false.obs;
+  RxBool isLoadingBackup = false.obs;
   RxBool hasRestoredInSession = false.obs;
 
   static const String _backupFileName = 'expense_backup.json';
@@ -63,12 +65,14 @@ class SyncController extends GetxController {
   }
 
   Future<void> signIn() async {
-    try {
+    // try {
       await _googleSignIn.signIn();
-    } catch (error) {
-      debugPrint("Error signing in: $error");
-      Get.snackbar('Sign In Failed', 'Could not connect to Google. Please ensure your device has an active internet connection and Google Services are configured properly.');
-    }
+    // } catch (error) {
+    //   debugPrint("Error signing in: $error");
+    //   if (Get.context != null) {
+    //     showSnackBar(Get.context!, 'Sign In Failed', 'Could not connect to Google. Please ensure your device has an active internet connection and Google Services are configured properly.', isError: true);
+    //   }
+    // }
   }
 
   Future<void> signOut() async {
@@ -85,13 +89,43 @@ class SyncController extends GetxController {
     return drive.DriveApi(client);
   }
 
+  Future<String?> _getOrCreateFolder(drive.DriveApi driveApi) async {
+    const folderName = 'AC Manager';
+    try {
+      final list = await driveApi.files.list(
+        q: "name = '$folderName' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        spaces: 'drive',
+      );
+
+      if (list.files != null && list.files!.isNotEmpty) {
+        return list.files!.first.id;
+      }
+
+      final folder = drive.File()
+        ..name = folderName
+        ..mimeType = 'application/vnd.google-apps.folder';
+
+      final createdFolder = await driveApi.files.create(folder);
+      return createdFolder.id;
+    } catch (e) {
+      debugPrint("Error finding/creating AC Manager folder: $e");
+      return null;
+    }
+  }
+
   Future<void> syncNow() async {
     if (currentUser.value == null || SplashScreen.database == null) return;
     final driveApi = await _getDriveApi();
     if (driveApi == null) return;
 
     try {
-      final files = await driveApi.files.list(spaces: 'appDataFolder', q: "name = '$_backupFileName'");
+      final folderId = await _getOrCreateFolder(driveApi);
+      if (folderId == null) return;
+
+      final files = await driveApi.files.list(
+        q: "name = '$_backupFileName' and '$folderId' in parents and trashed = false",
+        spaces: 'drive',
+      );
       
       Map<String, dynamic> remoteData = {'accounts': [], 'transactions': []};
       String? remoteFileId;
@@ -100,7 +134,13 @@ class SyncController extends GetxController {
         remoteFileId = files.files!.first.id;
         final drive.Media response = await driveApi.files.get(remoteFileId!, downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
         final remoteDataStr = await utf8.decodeStream(response.stream);
-        remoteData = jsonDecode(remoteDataStr);
+        final Map<String, dynamic> rawJson = jsonDecode(remoteDataStr);
+        if (rawJson['encrypted'] == true && rawJson.containsKey('data')) {
+          final String decryptedStr = AppEncryption.decrypt(rawJson['data']);
+          remoteData = jsonDecode(decryptedStr);
+        } else {
+          remoteData = rawJson;
+        }
       }
 
       // Fetch Local
@@ -133,13 +173,25 @@ class SyncController extends GetxController {
       };
       
       final String uploadJson = jsonEncode(uploadMap);
-      final List<int> bytes = utf8.encode(uploadJson);
+      final String encryptedBase64 = AppEncryption.encrypt(uploadJson);
+      final Map<String, dynamic> encryptedWrap = {
+        'version': 1,
+        'encrypted': true,
+        'data': encryptedBase64,
+      };
+      final String wrapJson = jsonEncode(encryptedWrap);
+      final List<int> bytes = utf8.encode(wrapJson);
       final media = drive.Media(Stream<List<int>>.fromIterable([bytes]), bytes.length);
 
       if (remoteFileId != null) {
         await driveApi.files.update(drive.File(), remoteFileId, uploadMedia: media);
       } else {
-        await driveApi.files.create(drive.File()..name = _backupFileName..parents = ['appDataFolder'], uploadMedia: media);
+        await driveApi.files.create(
+          drive.File()
+            ..name = _backupFileName
+            ..parents = [folderId],
+          uploadMedia: media,
+        );
       }
 
       lastSynced.value = DateTime.now();
@@ -148,14 +200,6 @@ class SyncController extends GetxController {
       if (Get.isRegistered<DatabaseController>()) {
         await Get.find<DatabaseController>().selectData();
       }
-
-
-      // final files1 = await driveApi.files.list(spaces: 'appDataFolder', q: "name = '$_backupFileName'");
-      // if (files1.files != null && files1.files!.isNotEmpty) {
-      //   final drive.Media response = await driveApi.files.get(files1.files!.first.id!, downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
-      //   final remoteDataStr = await utf8.decodeStream(response.stream);
-      // print("new ::::::: ${jsonDecode(remoteDataStr)}");
-      // }
 
     } catch (e) {
       debugPrint("Sync Error: $e");
@@ -186,6 +230,9 @@ class SyncController extends GetxController {
     final driveApi = await _getDriveApi();
     if (driveApi == null) return;
 
+    final folderId = await _getOrCreateFolder(driveApi);
+    if (folderId == null) return;
+
     final localAccounts = await SplashScreen.database!.rawQuery("SELECT * FROM Account");
     final localTransactions = await SplashScreen.database!.rawQuery("SELECT * FROM MyTransaction");
     
@@ -195,14 +242,29 @@ class SyncController extends GetxController {
     };
     
     final String uploadJson = jsonEncode(uploadMap);
-    final List<int> bytes = utf8.encode(uploadJson);
+    final String encryptedBase64 = AppEncryption.encrypt(uploadJson);
+    final Map<String, dynamic> encryptedWrap = {
+      'version': 1,
+      'encrypted': true,
+      'data': encryptedBase64,
+    };
+    final String wrapJson = jsonEncode(encryptedWrap);
+    final List<int> bytes = utf8.encode(wrapJson);
     final media = drive.Media(Stream.fromIterable([bytes]), bytes.length);
 
-    final files = await driveApi.files.list(spaces: 'appDataFolder', q: "name = '$_backupFileName'");
+    final files = await driveApi.files.list(
+      q: "name = '$_backupFileName' and '$folderId' in parents and trashed = false",
+      spaces: 'drive',
+    );
     if (files.files != null && files.files!.isNotEmpty) {
       await driveApi.files.update(drive.File(), files.files!.first.id!, uploadMedia: media);
     } else {
-      await driveApi.files.create(drive.File()..name = _backupFileName..parents = ['appDataFolder'], uploadMedia: media);
+      await driveApi.files.create(
+        drive.File()
+          ..name = _backupFileName
+          ..parents = [folderId],
+        uploadMedia: media,
+      );
     }
 
     await SplashScreen.database!.rawUpdate("UPDATE Account SET is_synced=1");
@@ -217,13 +279,26 @@ class SyncController extends GetxController {
     if (driveApi == null) return false;
 
     try {
-      final files = await driveApi.files.list(spaces: 'appDataFolder', q: "name = '$_backupFileName'");
+      final folderId = await _getOrCreateFolder(driveApi);
+      if (folderId == null) return false;
+
+      final files = await driveApi.files.list(
+        q: "name = '$_backupFileName' and '$folderId' in parents and trashed = false",
+        spaces: 'drive',
+      );
       if (files.files == null || files.files!.isEmpty) return false;
       
       final remoteFileId = files.files!.first.id!;
       final drive.Media response = await driveApi.files.get(remoteFileId, downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
       final remoteDataStr = await utf8.decodeStream(response.stream);
-      final Map<String, dynamic> remoteData = jsonDecode(remoteDataStr);
+      final Map<String, dynamic> rawJson = jsonDecode(remoteDataStr);
+      Map<String, dynamic> remoteData;
+      if (rawJson['encrypted'] == true && rawJson.containsKey('data')) {
+        final String decryptedStr = AppEncryption.decrypt(rawJson['data']);
+        remoteData = jsonDecode(decryptedStr);
+      } else {
+        remoteData = rawJson;
+      }
 
       await SplashScreen.database!.transaction((txn) async {
         await txn.rawDelete("DELETE FROM Account");
@@ -254,9 +329,15 @@ class SyncController extends GetxController {
     if (currentUser.value == null) return null;
     final driveApi = await _getDriveApi();
     if (driveApi == null) return null;
-    final files = await driveApi.files.list(spaces: 'appDataFolder', q: "name = '$_backupFileName'", $fields: "files(id, name, modifiedTime)");
 
-    print("files ::::::: ${files.files?.first.toJson()}");
+    final folderId = await _getOrCreateFolder(driveApi);
+    if (folderId == null) return null;
+
+    final files = await driveApi.files.list(
+      q: "name = '$_backupFileName' and '$folderId' in parents and trashed = false",
+      spaces: 'drive',
+      $fields: "files(id, name, modifiedTime)",
+    );
 
     if (files.files != null && files.files!.isNotEmpty) return files.files!.first.modifiedTime ?? DateTime.now();
     return null;
@@ -268,7 +349,13 @@ class SyncController extends GetxController {
     if (driveApi == null) return;
 
     try {
-      final files = await driveApi.files.list(spaces: 'appDataFolder', q: "name = '$_backupFileName'");
+      final folderId = await _getOrCreateFolder(driveApi);
+      if (folderId == null) return;
+
+      final files = await driveApi.files.list(
+        q: "name = '$_backupFileName' and '$folderId' in parents and trashed = false",
+        spaces: 'drive',
+      );
       if (files.files != null && files.files!.isNotEmpty) {
         for (var file in files.files!) {
           await driveApi.files.delete(file.id!);
