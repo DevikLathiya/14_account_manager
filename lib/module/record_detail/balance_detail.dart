@@ -179,11 +179,8 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                       final bool isCredit = item.credit != 0.0;
                                       final double amountDouble = isCredit ? item.credit : item.debit;
                                       final amountStr = (amountDouble % 1 == 0) ? amountDouble.toStringAsFixed(0) : amountDouble.toStringAsFixed(2);
-
                                       final tColor = isCredit ? const Color(0xFF2E7D32) : const Color(0xFFC62828);
-
                                       final bal = balanceMap[item.id] ?? 0.0;
-                                      final balStr = (bal % 1 == 0) ? bal.toStringAsFixed(0) : bal.toStringAsFixed(2);
 
                                       return Column(
                                         mainAxisSize: MainAxisSize.min,
@@ -193,7 +190,7 @@ class _BalanceDetailScreenState extends State<BalanceDetailScreen> {
                                             onTap: () => editDeleteDialog(context, isCredit, amountStr, item, controller),
                                             child: Container(
                                               padding: const EdgeInsets.fromLTRB(6, 10, 0, 10),
-                                              color: const Color.fromARGB(255, 135, 68, 68),
+                                              color: Colors.white,
                                               child: Row(
                                                 children: [
                                                   // Amount Column
